@@ -1,11 +1,15 @@
 class BooksController < ApplicationController
+  before_action :book_matching?,only: [:edit,:update,:destroy]
 
   def show
+    @book_new = Book.new
     @book = Book.find(params[:id])
+    @user = @book.user
   end
 
   def index
     @books = Book.all
+    @book = Book.new
   end
 
   def create
@@ -32,15 +36,22 @@ class BooksController < ApplicationController
     end
   end
 
-  def delete
+  def destroy
     @book = Book.find(params[:id])
-    @book.destoy
+    @book.destroy
     redirect_to books_path
   end
 
   private
 
   def book_params
-    params.require(:book).permit(:title)
+    params.require(:book).permit(:title,:body)
+  end
+
+  def book_matching?
+    book = Book.find(params[:id])
+    if current_user.id != book.user_id
+      redirect_to books_path
+    end
   end
 end
